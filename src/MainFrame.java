@@ -1,6 +1,20 @@
 
 import java.awt.Color;
 import java.awt.Font;
+import java.io.BufferedReader;
+import javax.swing.JColorChooser;
+import javax.swing.JFileChooser;
+import java.io.File; 
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -13,9 +27,14 @@ import java.awt.Font;
  * @author Łukasz
  */
 public class MainFrame extends javax.swing.JFrame {
+    boolean ifLineWrap = true;
     int fontSize = 14;
     boolean ifBold = false;
     int currentStateOfFont = Font.PLAIN;
+    Color brushColor = Color.BLACK;
+    Color brushColorBackground = Color.WHITE;
+    boolean cursive = false;
+    String currentFont;
     /**
      * Creates new form MainFrame
      */
@@ -35,6 +54,16 @@ public class MainFrame extends javax.swing.JFrame {
 
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextArea1 = new javax.swing.JTextArea();
+        jPopupMenu1 = new javax.swing.JPopupMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
+        jPopupMenu2 = new javax.swing.JPopupMenu();
+        jPopupMenu3 = new javax.swing.JPopupMenu();
+        jPopupMenu4 = new javax.swing.JPopupMenu();
+        jPopupMenu5 = new javax.swing.JPopupMenu();
+        jMenuItem2 = new javax.swing.JMenuItem();
+        jMenu1 = new javax.swing.JMenu();
+        jCheckBoxMenuItem1 = new javax.swing.JCheckBoxMenuItem();
+        jPopupMenu6 = new javax.swing.JPopupMenu();
         jPanel1 = new javax.swing.JPanel();
         jComboBox2 = new javax.swing.JComboBox<>();
         jButton1 = new javax.swing.JButton();
@@ -50,18 +79,39 @@ public class MainFrame extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         MainText = new javax.swing.JTextArea();
+        jLabel3 = new javax.swing.JLabel();
         jComboBox1 = new javax.swing.JComboBox<>();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu2 = new javax.swing.JMenu();
+        jMenuItem3 = new javax.swing.JMenuItem();
+        jMenuItem4 = new javax.swing.JMenuItem();
+        jMenuItem5 = new javax.swing.JMenuItem();
 
         jTextArea1.setColumns(20);
         jTextArea1.setRows(5);
         jScrollPane1.setViewportView(jTextArea1);
 
+        jMenuItem1.setText("jMenuItem1");
+
+        jMenuItem2.setText("jMenuItem2");
+
+        jMenu1.setText("jMenu1");
+
+        jCheckBoxMenuItem1.setSelected(true);
+        jCheckBoxMenuItem1.setText("jCheckBoxMenuItem1");
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("WORD BY ŁUKASZ GUMIENNICZUK");
 
         jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "14", "16", "18", "32", "42", "64", "72" }));
         jComboBox2.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jComboBox2ItemStateChanged(evt);
+            }
+        });
+        jComboBox2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBox2ActionPerformed(evt);
             }
         });
 
@@ -73,6 +123,11 @@ public class MainFrame extends javax.swing.JFrame {
         });
 
         jButton2.setText("I");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         jButton3.setBackground(new java.awt.Color(0, 0, 0));
         jButton3.addActionListener(new java.awt.event.ActionListener() {
@@ -85,6 +140,12 @@ public class MainFrame extends javax.swing.JFrame {
 
         jLabel2.setText("Kolor tła");
 
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
         jCheckBox1.setSelected(true);
         jCheckBox1.setText("Zawijaj tekst");
         jCheckBox1.addActionListener(new java.awt.event.ActionListener() {
@@ -94,10 +155,25 @@ public class MainFrame extends javax.swing.JFrame {
         });
 
         jButton5.setText("Kopiuj");
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
 
         jButton6.setText("Wytnij");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
 
         jButton7.setText("Wklej");
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -125,7 +201,7 @@ public class MainFrame extends javax.swing.JFrame {
                 .addComponent(jButton6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton7)
-                .addGap(0, 24, Short.MAX_VALUE))
+                .addGap(0, 17, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -152,20 +228,34 @@ public class MainFrame extends javax.swing.JFrame {
         MainText.setLineWrap(true);
         MainText.setRows(5);
         MainText.setWrapStyleWord(true);
+        MainText.addCaretListener(new javax.swing.event.CaretListener() {
+            public void caretUpdate(javax.swing.event.CaretEvent evt) {
+                MainTextCaretUpdate(evt);
+            }
+        });
         jScrollPane2.setViewportView(MainText);
+
+        jLabel3.setText("Licznik znaków: 0");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 887, Short.MAX_VALUE)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 497, Short.MAX_VALUE)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 506, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel3))
         );
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Arial", "Comic Sans", "Serif", " " }));
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Arial", "Comic Sans MS", "Serif" }));
         jComboBox1.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jComboBox1ItemStateChanged(evt);
@@ -176,6 +266,36 @@ public class MainFrame extends javax.swing.JFrame {
                 jComboBox1ActionPerformed(evt);
             }
         });
+
+        jMenu2.setText("Plik");
+
+        jMenuItem3.setText("Otwórz");
+        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem3ActionPerformed(evt);
+            }
+        });
+        jMenu2.add(jMenuItem3);
+
+        jMenuItem4.setText("Zapisz");
+        jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem4ActionPerformed(evt);
+            }
+        });
+        jMenu2.add(jMenuItem4);
+
+        jMenuItem5.setText("Zakończ");
+        jMenuItem5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem5ActionPerformed(evt);
+            }
+        });
+        jMenu2.add(jMenuItem5);
+
+        jMenuBar1.add(jMenu2);
+
+        setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -207,31 +327,39 @@ public class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        Font currentFont = MainText.getFont();
+
         if(ifBold){
             currentStateOfFont = Font.PLAIN;
-            MainText.setFont(new Font(currentFont.getName(),currentStateOfFont,fontSize));
+            cursiveValidation(currentFont,currentStateOfFont,fontSize);
             ifBold = false;
         }else{
             currentStateOfFont = Font.BOLD;
-            MainText.setFont(new Font(currentFont.getName(),currentStateOfFont,fontSize));  
+            cursiveValidation(currentFont,currentStateOfFont,fontSize);  
             ifBold = true;
         }
     }//GEN-LAST:event_jButton1ActionPerformed
-
+    private void cursiveValidation(String currentFont,int currentStateOfFont,int fontSize){
+        if(cursive){
+            MainText.setFont(new Font(currentFont,currentStateOfFont+Font.ITALIC,fontSize)); 
+        }else{
+            MainText.setFont(new Font(currentFont,currentStateOfFont,fontSize)); 
+        }
+    }
     private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox1ActionPerformed
-        // TODO add your handling code here:
+        if(ifLineWrap)
+        {
+            MainText.setLineWrap(false);
+            ifLineWrap = false;
+        }
+        else{
+            MainText.setLineWrap(true);
+            ifLineWrap = true;
+        }
     }//GEN-LAST:event_jCheckBox1ActionPerformed
 
     private void jComboBox1ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBox1ItemStateChanged
-
-        if(jComboBox1.getSelectedIndex()==1){
-            MainText.setFont(new Font("Comic Sans MS", currentStateOfFont, fontSize));
-        }else if(jComboBox1.getSelectedIndex()==0){
-            MainText.setFont(new Font("Arial",currentStateOfFont,fontSize));
-        }else if(jComboBox1.getSelectedIndex()==2){
-            MainText.setFont(new Font("Serif",currentStateOfFont,fontSize));
-        }
+        currentFont = jComboBox1.getSelectedItem().toString();
+        cursiveValidation(currentFont,currentStateOfFont,fontSize);
         
         
     }//GEN-LAST:event_jComboBox1ItemStateChanged
@@ -242,14 +370,94 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void jComboBox2ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBox2ItemStateChanged
         fontSize = Integer.valueOf((String)jComboBox2.getSelectedItem());
-        Font currentFont = MainText.getFont();
-        String fontName = currentFont.getName();
-        MainText.setFont(new Font(fontName,currentStateOfFont,fontSize));
+        cursiveValidation(currentFont,currentStateOfFont,fontSize);
     }//GEN-LAST:event_jComboBox2ItemStateChanged
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        MainText.setForeground(Color.red);
+        brushColor = JColorChooser.showDialog(null, "Wybierz kolor", brushColor);
+        jButton3.setBackground(brushColor);
+        MainText.setForeground(brushColor);
     }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        if(cursive){
+            MainText.setFont(new Font(currentFont,currentStateOfFont,fontSize));
+            cursive = false;
+        }else{
+            MainText.setFont(new Font(currentFont,currentStateOfFont+Font.ITALIC,fontSize));
+            cursive = true;
+        }
+        
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        brushColorBackground = JColorChooser.showDialog(null, "Wybierz kolor", brushColor);
+        jButton4.setBackground(brushColorBackground);
+        MainText.setBackground(brushColorBackground);
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        // copy
+        MainText.copy();
+    }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+        MainText.paste();
+    }//GEN-LAST:event_jButton7ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+       MainText.cut();
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void jComboBox2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox2ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jComboBox2ActionPerformed
+
+    private void MainTextCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_MainTextCaretUpdate
+        int textContent = MainText.getText().length();
+        jLabel3.setText("Licznik znaków: "+textContent);
+    }//GEN-LAST:event_MainTextCaretUpdate
+
+    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+        int result = fileChooser.showOpenDialog(fileChooser);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            try (InputStream in = Files.newInputStream(selectedFile.toPath());
+                BufferedReader reader =
+                new BufferedReader(new InputStreamReader(in))) {
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                    MainText.append(line+"\n");
+                }
+            } catch (IOException x) {
+                System.err.println(x);
+            }
+        }
+    }//GEN-LAST:event_jMenuItem3ActionPerformed
+
+    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Specify a file to save");   
+        int userSelection = fileChooser.showSaveDialog(fileChooser);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fileChooser.getSelectedFile();
+            FileWriter fw;
+            try {
+                fw = new FileWriter(fileToSave.getAbsoluteFile(), true);
+                MainText.write(fw);
+            } catch (IOException ex) {
+                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+        }
+    }//GEN-LAST:event_jMenuItem4ActionPerformed
+
+    private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
+        System.exit(0);
+    }//GEN-LAST:event_jMenuItem5ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -296,14 +504,34 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
     private javax.swing.JCheckBox jCheckBox1;
+    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem3;
+    private javax.swing.JMenuItem jMenuItem4;
+    private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPopupMenu jPopupMenu1;
+    private javax.swing.JPopupMenu jPopupMenu2;
+    private javax.swing.JPopupMenu jPopupMenu3;
+    private javax.swing.JPopupMenu jPopupMenu4;
+    private javax.swing.JPopupMenu jPopupMenu5;
+    private javax.swing.JPopupMenu jPopupMenu6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextArea jTextArea1;
     // End of variables declaration//GEN-END:variables
+
+    private String readFromInputStream(InputStream inputStream) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
